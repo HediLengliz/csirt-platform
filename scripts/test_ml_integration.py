@@ -1,28 +1,32 @@
 """Test ML integration with alert creation."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config.database import SessionLocal
-from models.event import Event, EventType, EventSource
+from datetime import datetime
+
 from alerts.manager import AlertManager
 from alerts.tasks import _get_event_context
-from datetime import datetime
+from config.database import SessionLocal
+from models.event import Event, EventSource, EventType
+
 
 def test_ml_integration():
     """Test if ML is working when creating alerts."""
     db = SessionLocal()
     manager = AlertManager()
-    
+
     print("=" * 70)
     print("Testing ML Integration with Alert Creation")
     print("=" * 70)
     print()
-    
+
     # Check if ML system is available
     print(f"ML System Available: {manager.ml_system is not None}")
     print()
-    
+
     # Create a test event with ransomware keywords
     print("Creating test event with ransomware...")
     event = Event(
@@ -35,19 +39,19 @@ def test_ml_integration():
         user="admin",
         hostname="server-01",
         raw_data={},
-        timestamp=datetime.utcnow().isoformat()
+        timestamp=datetime.utcnow().isoformat(),
     )
     db.add(event)
     db.commit()
     db.refresh(event)
     print(f"✅ Event created: ID {event.id}")
     print()
-    
+
     # Get context
     context = _get_event_context(db, event)
     print(f"Context: {context}")
     print()
-    
+
     # Test ML processing directly
     if manager.ml_system:
         print("Testing ML processing...")
@@ -65,12 +69,13 @@ def test_ml_integration():
         except Exception as e:
             print(f"❌ ML Processing Error: {e}")
             import traceback
+
             traceback.print_exc()
             print()
     else:
         print("❌ ML System not available!")
         print()
-    
+
     # Create alert (this should use ML automatically)
     print("Creating alert from event (should use ML automatically)...")
     try:
@@ -80,28 +85,29 @@ def test_ml_integration():
         print(f"  - Priority: {alert.priority.value}")
         print(f"  - ML Score: {alert.ml_score:.1%}")
         print(f"  - Description length: {len(alert.description)} chars")
-        
+
         # Check if ML insights are in description
         if "[ML Classification]" in alert.description:
             print("  ✅ ML Classification found in description!")
         else:
             print("  ⚠️  ML Classification NOT found in description")
-        
+
         if "[Anomaly Detection]" in alert.description:
             print("  ✅ Anomaly Detection found in description!")
         else:
             print("  ⚠️  Anomaly Detection NOT found in description")
-        
+
         print()
     except Exception as e:
         print(f"❌ Alert Creation Error: {e}")
         import traceback
+
         traceback.print_exc()
         print()
-    
+
     print("=" * 70)
     db.close()
 
+
 if __name__ == "__main__":
     test_ml_integration()
-

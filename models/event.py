@@ -1,12 +1,16 @@
 """Event model for security events."""
-from sqlalchemy import Column, String, Text, JSON, Enum, ForeignKey
-from sqlalchemy.orm import relationship
-from models.base import BaseModel
+
 import enum
+
+from sqlalchemy import JSON, Column, Enum, ForeignKey, String, Text
+from sqlalchemy.orm import relationship
+
+from models.base import BaseModel
 
 
 class EventSource(str, enum.Enum):
     """Event source types."""
+
     SPLUNK = "splunk"
     ELASTIC = "elastic"
     ENDPOINT = "endpoint"
@@ -18,6 +22,7 @@ class EventSource(str, enum.Enum):
 
 class EventType(str, enum.Enum):
     """Event types."""
+
     LOGIN_FAILURE = "login_failure"
     LOGIN_SUCCESS = "login_success"
     MALWARE_DETECTED = "malware_detected"
@@ -32,8 +37,9 @@ class EventType(str, enum.Enum):
 
 class Event(BaseModel):
     """Security event model."""
+
     __tablename__ = "events"
-    
+
     source = Column(Enum(EventSource), nullable=False, index=True)
     event_type = Column(Enum(EventType), nullable=False, index=True)
     raw_data = Column(JSON, nullable=False)
@@ -45,7 +51,6 @@ class Event(BaseModel):
     hostname = Column(String, nullable=True, index=True)
     description = Column(Text, nullable=True)
     severity_score = Column(String, nullable=True)
-    
+
     # Relationships
     alerts = relationship("Alert", back_populates="event")
-

@@ -1,18 +1,22 @@
 """Events API routes."""
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+
+from datetime import datetime
 from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from alerts.tasks import process_events_to_alerts
 from config.database import get_db
 from models.event import Event, EventSource, EventType
-from alerts.tasks import process_events_to_alerts
-from pydantic import BaseModel
-from datetime import datetime
 
 router = APIRouter()
 
 
 class EventCreate(BaseModel):
     """Event creation schema."""
+
     source: str
     event_type: str
     raw_data: dict
@@ -27,6 +31,7 @@ class EventCreate(BaseModel):
 
 class EventResponse(BaseModel):
     """Event response schema."""
+
     id: int
     source: str
     event_type: str
@@ -37,12 +42,10 @@ class EventResponse(BaseModel):
     hostname: Optional[str]
     description: Optional[str]
     created_at: str
-    
+
     class Config:
         from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat() if v else None
-        }
+        json_encoders = {datetime: lambda v: v.isoformat() if v else None}
 
 
 @router.post("/", response_model=EventResponse)
@@ -64,10 +67,10 @@ async def create_event(event: EventCreate, db: Session = Depends(get_db)):
         db.add(db_event)
         db.commit()
         db.refresh(db_event)
-        
+
         # Trigger alert creation asynchronously
         process_events_to_alerts.delay([db_event.id])
-        
+
         # Convert to response format
         return EventResponse(
             id=db_event.id,
@@ -92,16 +95,16 @@ async def get_events(
     limit: int = 100,
     source: Optional[str] = None,
     event_type: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get events with filtering."""
     query = db.query(Event)
-    
+
     if source:
         query = query.filter(Event.source == EventSource(source))
     if event_type:
         query = query.filter(Event.event_type == EventType(event_type))
-    
+
     events = query.order_by(Event.created_at.desc()).offset(skip).limit(limit).all()
     return [
         EventResponse(
@@ -138,4 +141,3 @@ async def get_event(event_id: int, db: Session = Depends(get_db)):
         description=event.description,
         created_at=event.created_at.isoformat() if event.created_at else "",
     )
-

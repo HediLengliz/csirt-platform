@@ -1,6 +1,7 @@
 """API endpoints for CSIRT Platform."""
+
 from api.main import app
-from api.routes import events, alerts, incidents, integrations
+from api.routes import alerts, events, incidents, integrations
 
 __all__ = [
     "app",
@@ -9,4 +10,3 @@ __all__ = [
     "incidents",
     "integrations",
 ]
-

@@ -1,5 +1,7 @@
 """ML and AI modules for real-time detection and classification."""
-from ml.detector import RealTimeMLSystem, RealTimeAnomalyDetector, AlertClassifier
+
+from ml.detector import (AlertClassifier, RealTimeAnomalyDetector,
+                         RealTimeMLSystem)
 from ml.singleton import get_ml_system
 
 __all__ = [
@@ -8,4 +10,3 @@ __all__ = [
     "AlertClassifier",
     "get_ml_system",
 ]
-

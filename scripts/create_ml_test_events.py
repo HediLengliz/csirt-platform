@@ -1,25 +1,29 @@
 """Create 10 diverse events to test real-time ML detection."""
-import sys
+
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config.database import SessionLocal
-from models.event import Event, EventType, EventSource
+import time
+from datetime import datetime
+
 from alerts.manager import AlertManager
 from alerts.tasks import _get_event_context
-from datetime import datetime
-import time
+from config.database import SessionLocal
+from models.event import Event, EventSource, EventType
+
 
 def create_ml_test_events():
     """Create 10 diverse events to test real-time ML."""
     db = SessionLocal()
     manager = AlertManager()
-    
+
     print("=" * 70)
     print("Creating 10 Events for Real-Time ML Testing")
     print("=" * 70)
     print()
-    
+
     events_to_create = [
         {
             "name": "Ransomware Attack",
@@ -30,7 +34,7 @@ def create_ml_test_events():
             "source_ip": "192.168.1.100",
             "destination_ip": "10.0.0.1",
             "user": "admin",
-            "hostname": "server-01"
+            "hostname": "server-01",
         },
         {
             "name": "Brute Force Attack",
@@ -40,7 +44,7 @@ def create_ml_test_events():
             "severity_score": "7.5",
             "source_ip": "10.0.0.50",
             "destination_ip": "192.168.1.10",
-            "user": "user1"
+            "user": "user1",
         },
         {
             "name": "Data Exfiltration",
@@ -50,7 +54,7 @@ def create_ml_test_events():
             "severity_score": "8.5",
             "source_ip": "172.16.0.10",
             "destination_ip": "203.0.113.50",
-            "user": "data_analyst"
+            "user": "data_analyst",
         },
         {
             "name": "Privilege Escalation",
@@ -60,7 +64,7 @@ def create_ml_test_events():
             "severity_score": "8.0",
             "source_ip": "192.168.1.50",
             "user": "user2",
-            "hostname": "workstation-05"
+            "hostname": "workstation-05",
         },
         {
             "name": "DDoS Attack",
@@ -69,7 +73,7 @@ def create_ml_test_events():
             "description": "Distributed Denial of Service attack detected. Traffic flood from multiple IPs. Bandwidth overload. Service unavailable.",
             "severity_score": "7.0",
             "source_ip": "198.51.100.10",
-            "destination_ip": "192.168.1.1"
+            "destination_ip": "192.168.1.1",
         },
         {
             "name": "Phishing Attempt",
@@ -78,7 +82,7 @@ def create_ml_test_events():
             "description": "Suspicious email detected. Phishing link in attachment. User clicked suspicious link. Malicious attachment detected.",
             "severity_score": "6.0",
             "source_ip": "192.168.1.75",
-            "user": "employee1"
+            "user": "employee1",
         },
         {
             "name": "Suspicious Activity",
@@ -87,7 +91,7 @@ def create_ml_test_events():
             "description": "Unusual network traffic pattern detected. Multiple connection attempts to unknown domains. Suspicious behavior observed.",
             "severity_score": "5.5",
             "source_ip": "172.16.0.20",
-            "destination_ip": "192.168.1.20"
+            "destination_ip": "192.168.1.20",
         },
         {
             "name": "Login Failure",
@@ -96,7 +100,7 @@ def create_ml_test_events():
             "description": "Failed login attempt for user admin. Incorrect password entered.",
             "severity_score": "3.0",
             "source_ip": "192.168.1.30",
-            "user": "admin"
+            "user": "admin",
         },
         {
             "name": "Exploit Attempt",
@@ -106,7 +110,7 @@ def create_ml_test_events():
             "severity_score": "8.5",
             "source_ip": "203.0.113.100",
             "destination_ip": "192.168.1.15",
-            "user": "web_user"
+            "user": "web_user",
         },
         {
             "name": "Normal Login",
@@ -115,15 +119,15 @@ def create_ml_test_events():
             "description": "Successful user login from authorized IP address.",
             "severity_score": "1.0",
             "source_ip": "192.168.1.20",
-            "user": "normal_user"
-        }
+            "user": "normal_user",
+        },
     ]
-    
+
     created_alerts = []
-    
+
     for i, event_data in enumerate(events_to_create, 1):
         print(f"{i}. Creating: {event_data['name']}")
-        
+
         event = Event(
             source=event_data["source"],
             event_type=event_data["event_type"],
@@ -134,38 +138,38 @@ def create_ml_test_events():
             user=event_data.get("user"),
             hostname=event_data.get("hostname"),
             raw_data={},
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=datetime.utcnow().isoformat(),
         )
-        
+
         db.add(event)
         db.commit()
         db.refresh(event)
-        
+
         # Get context
         context = _get_event_context(db, event)
-        
+
         # Create alert (ML will process automatically)
         alert = manager.create_alert_from_event(db, event, context)
         created_alerts.append(alert)
-        
+
         # Show ML results
         print(f"   ✅ Event ID: {event.id}")
         print(f"   ✅ Alert ID: {alert.id}")
         print(f"   ✅ Title: {alert.title[:60]}...")
         print(f"   ✅ Priority: {alert.priority.value.upper()}")
         print(f"   ✅ ML Score: {alert.ml_score:.1%}")
-        
+
         # Check if ML classification is in description
         if "[ML Classification]" in alert.description:
             print(f"   ✅ ML Classification: Active")
         if "[Anomaly Detection]" in alert.description:
             print(f"   ✅ Anomaly Detection: Active")
-        
+
         print()
-        
+
         # Small delay to see real-time processing
         time.sleep(0.5)
-    
+
     print("=" * 70)
     print("✅ 10 Events Created Successfully!")
     print("=" * 70)
@@ -185,9 +189,11 @@ def create_ml_test_events():
             attack_type = "DDoS"
         elif "[Phishing]" in alert.title:
             attack_type = "Phishing"
-        
-        print(f"  {i}. Alert {alert.id}: {alert.priority.value.upper()} | ML: {alert.ml_score:.1%} | {attack_type}")
-    
+
+        print(
+            f"  {i}. Alert {alert.id}: {alert.priority.value.upper()} | ML: {alert.ml_score:.1%} | {attack_type}"
+        )
+
     print()
     print("🎯 Next Steps:")
     print("  1. Go to http://localhost:3000/alerts")
@@ -196,9 +202,9 @@ def create_ml_test_events():
     print("  4. Click 'Refresh' to see real-time ML analysis")
     print()
     print("=" * 70)
-    
+
     db.close()
+
 
 if __name__ == "__main__":
     create_ml_test_events()
-

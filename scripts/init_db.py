@@ -1,7 +1,9 @@
 """Initialize database with tables."""
-from config.database import engine, Base
+
+from config.database import Base, engine
 from models import *  # Import all models
 from utils.logger import logger
+
 
 def init_database():
     """Create all database tables."""
@@ -12,6 +14,6 @@ def init_database():
         logger.error(f"Error creating database tables: {e}")
         raise
 
+
 if __name__ == "__main__":
     init_database()
-

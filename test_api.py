@@ -1,7 +1,9 @@
 """Quick test script for CSIRT Platform API."""
-import requests
+
 import json
 import time
+
+import requests
 
 API_URL = "http://localhost:8000"
 
@@ -39,21 +41,21 @@ def test_create_event():
         "user": "test_user",
         "hostname": "test-server",
         "description": "Test event from Python script",
-        "severity_score": "7.5"
+        "severity_score": "7.5",
     }
-    
+
     try:
         response = requests.post(
             f"{API_URL}/api/v1/events/",
             json=event_data,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
         print(f"Status: {response.status_code}")
         if response.status_code == 200:
             event = response.json()
             print(f"Event created: ID={event.get('id')}")
             print(f"Event type: {event.get('event_type')}")
-            return event.get('id')
+            return event.get("id")
         else:
             print(f"Error: {response.text}")
             return None
@@ -72,7 +74,9 @@ def test_list_events():
             events = response.json()
             print(f"Total events: {len(events)}")
             if events:
-                print(f"First event: ID={events[0].get('id')}, Type={events[0].get('event_type')}")
+                print(
+                    f"First event: ID={events[0].get('id')}, Type={events[0].get('event_type')}"
+                )
             return len(events)
         else:
             print(f"Error: {response.text}")
@@ -93,8 +97,10 @@ def test_list_alerts():
             print(f"Total alerts: {len(alerts)}")
             if alerts:
                 alert = alerts[0]
-                print(f"First alert: ID={alert.get('id')}, Priority={alert.get('priority')}, Status={alert.get('status')}")
-                if alert.get('ml_score'):
+                print(
+                    f"First alert: ID={alert.get('id')}, Priority={alert.get('priority')}, Status={alert.get('status')}"
+                )
+                if alert.get("ml_score"):
                     print(f"ML Score: {alert.get('ml_score')}")
             return len(alerts)
         else:
@@ -131,23 +137,21 @@ def test_create_incident():
         "description": "Incident created from test script",
         "severity": "high",
         "tags": ["test", "automated"],
-        "ioc": [
-            {"type": "ip", "value": "192.168.1.100"}
-        ]
+        "ioc": [{"type": "ip", "value": "192.168.1.100"}],
     }
-    
+
     try:
         response = requests.post(
             f"{API_URL}/api/v1/incidents/",
             json=incident_data,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
         print(f"Status: {response.status_code}")
         if response.status_code == 200:
             incident = response.json()
             print(f"Incident created: ID={incident.get('id')}")
             print(f"Severity: {incident.get('severity')}")
-            return incident.get('id')
+            return incident.get("id")
         else:
             print(f"Error: {response.text}")
             return None
@@ -166,7 +170,9 @@ def test_list_incidents():
             incidents = response.json()
             print(f"Total incidents: {len(incidents)}")
             if incidents:
-                print(f"First incident: ID={incidents[0].get('id')}, Severity={incidents[0].get('severity')}")
+                print(
+                    f"First incident: ID={incidents[0].get('id')}, Severity={incidents[0].get('severity')}"
+                )
             return len(incidents)
         else:
             print(f"Error: {response.text}")
@@ -186,13 +192,13 @@ def test_create_multiple_events():
             "event_type": "login_failure",
             "raw_data": {"attempt": i + 1},
             "source_ip": "192.168.1.100",  # Same IP for correlation
-            "description": f"Failed login attempt {i + 1}"
+            "description": f"Failed login attempt {i + 1}",
         }
         try:
             response = requests.post(
                 f"{API_URL}/api/v1/events/",
                 json=event_data,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
             if response.status_code == 200:
                 events_created += 1
@@ -200,7 +206,7 @@ def test_create_multiple_events():
             time.sleep(1)  # Small delay
         except Exception as e:
             print(f"Error creating event {i + 1}: {e}")
-    
+
     print(f"Total events created: {events_created}")
     return events_created
 
@@ -211,7 +217,7 @@ def main():
     print("CSIRT Platform API Test Suite")
     print("=" * 60)
     print(f"API URL: {API_URL}")
-    
+
     results = {
         "health_check": test_health_check(),
         "create_event": test_create_event(),
@@ -222,7 +228,7 @@ def main():
         "list_incidents": test_list_incidents(),
         "multiple_events": test_create_multiple_events(),
     }
-    
+
     print_section("Test Summary")
     print(f"Health Check: {'PASS' if results['health_check'] else 'FAIL'}")
     print(f"Create Event: {'PASS' if results['create_event'] else 'FAIL'}")
@@ -232,17 +238,18 @@ def main():
     print(f"Create Incident: {'PASS' if results['create_incident'] else 'FAIL'}")
     print(f"List Incidents: {results['list_incidents']} incidents found")
     print(f"Multiple Events: {results['multiple_events']} events created")
-    
+
     print("\n" + "=" * 60)
     print("Testing complete!")
     print("=" * 60)
     print("\nNext steps:")
     print("1. Check alerts were generated (wait a few seconds)")
     print("2. Check Celery worker logs: docker-compose logs -f celery-worker")
-    print("3. Check database: docker-compose exec postgres psql -U csirt_user -d csirt_db -c 'SELECT COUNT(*) FROM alerts;'")
+    print(
+        "3. Check database: docker-compose exec postgres psql -U csirt_user -d csirt_db -c 'SELECT COUNT(*) FROM alerts;'"
+    )
     print("4. Visit API docs: http://localhost:8000/docs")
 
 
 if __name__ == "__main__":
     main()
-

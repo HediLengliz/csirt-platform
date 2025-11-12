@@ -1,19 +1,23 @@
 """Alerts API routes."""
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+
 from typing import List, Optional
-from config.database import get_db
-from models.alert import Alert, AlertStatus, AlertPriority
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from alerts.manager import AlertManager
 from alerts.tasks import process_events_to_alerts
+from config.database import get_db
 from integrations.tasks import send_alert_to_integrations
-from pydantic import BaseModel
+from models.alert import Alert, AlertPriority, AlertStatus
 
 router = APIRouter()
 
 
 class AlertResponse(BaseModel):
     """Alert response schema."""
+
     id: int
     title: str
     description: Optional[str]
@@ -22,13 +26,14 @@ class AlertResponse(BaseModel):
     ml_score: Optional[float]
     source: str
     created_at: str
-    
+
     class Config:
         from_attributes = True
 
 
 class AlertUpdate(BaseModel):
     """Alert update schema."""
+
     status: Optional[str] = None
     notes: Optional[str] = None
 
@@ -39,16 +44,16 @@ async def get_alerts(
     limit: int = 100,
     status: Optional[str] = None,
     priority: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get alerts with filtering."""
     query = db.query(Alert)
-    
+
     if status:
         query = query.filter(Alert.status == AlertStatus(status))
     if priority:
         query = query.filter(Alert.priority == AlertPriority(priority))
-    
+
     alerts = query.order_by(Alert.created_at.desc()).offset(skip).limit(limit).all()
     return [
         AlertResponse(
@@ -105,24 +110,20 @@ async def get_alert(alert_id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{alert_id}", response_model=AlertResponse)
 async def update_alert(
-    alert_id: int,
-    alert_update: AlertUpdate,
-    db: Session = Depends(get_db)
+    alert_id: int, alert_update: AlertUpdate, db: Session = Depends(get_db)
 ):
     """Update alert status."""
     alert_manager = AlertManager()
-    
+
     status = None
     if alert_update.status:
         status = AlertStatus(alert_update.status)
-    
-    alert = alert_manager.update_alert_status(
-        db, alert_id, status, alert_update.notes
-    )
-    
+
+    alert = alert_manager.update_alert_status(db, alert_id, status, alert_update.notes)
+
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
-    
+
     return AlertResponse(
         id=alert.id,
         title=alert.title,
@@ -141,12 +142,12 @@ async def send_alert(alert_id: int, db: Session = Depends(get_db)):
     alert = db.query(Alert).filter(Alert.id == alert_id).first()
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
-    
+
     # Trigger async task
     task = send_alert_to_integrations.delay(alert_id)
-    
+
     return {
         "message": "Alert sending initiated",
         "task_id": task.id,
-        "alert_id": alert_id
+        "alert_id": alert_id,
     }

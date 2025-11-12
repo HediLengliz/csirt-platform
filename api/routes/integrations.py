@@ -1,21 +1,25 @@
 """Integrations API routes."""
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+
 from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from config.database import get_db
-from models.integration import Integration, IntegrationType
-from integrations.siem_splunk import SplunkIntegration
 from integrations.siem_elastic import ElasticIntegration
-from integrations.soar_thehive import TheHiveIntegration
+from integrations.siem_splunk import SplunkIntegration
 from integrations.soar_cortex import CortexIntegration
 from integrations.soar_phantom import PhantomIntegration
-from pydantic import BaseModel
+from integrations.soar_thehive import TheHiveIntegration
+from models.integration import Integration, IntegrationType
 
 router = APIRouter()
 
 
 class IntegrationCreate(BaseModel):
     """Integration creation schema."""
+
     name: str
     integration_type: str
     config: dict
@@ -24,19 +28,22 @@ class IntegrationCreate(BaseModel):
 
 class IntegrationResponse(BaseModel):
     """Integration response schema."""
+
     id: int
     name: str
     integration_type: str
     enabled: bool
     status: Optional[str]
     last_sync: Optional[str]
-    
+
     class Config:
         from_attributes = True
 
 
 @router.post("/", response_model=IntegrationResponse)
-async def create_integration(integration: IntegrationCreate, db: Session = Depends(get_db)):
+async def create_integration(
+    integration: IntegrationCreate, db: Session = Depends(get_db)
+):
     """Create a new integration."""
     try:
         db_integration = Integration(
@@ -76,24 +83,21 @@ async def test_integration(integration_id: int, db: Session = Depends(get_db)):
     integration = db.query(Integration).filter(Integration.id == integration_id).first()
     if not integration:
         raise HTTPException(status_code=404, detail="Integration not found")
-    
+
     # Get integrator instance
     integrator = _get_integrator(integration)
     if not integrator:
         raise HTTPException(status_code=400, detail="Unknown integration type")
-    
+
     # Test connection
     connected = integrator.connect()
     status = integrator.get_status()
-    
+
     # Update integration status
     integration.status = "active" if connected else "error"
     db.commit()
-    
-    return {
-        "connected": connected,
-        "status": status
-    }
+
+    return {"connected": connected, "status": status}
 
 
 def _get_integrator(integration: Integration):
@@ -105,10 +109,9 @@ def _get_integrator(integration: Integration):
         IntegrationType.SOAR_CORTEX: CortexIntegration,
         IntegrationType.SOAR_PHANTOM: PhantomIntegration,
     }
-    
+
     integrator_class = type_mapping.get(integration.integration_type)
     if not integrator_class:
         return None
-    
-    return integrator_class(integration.config)
 
+    return integrator_class(integration.config)

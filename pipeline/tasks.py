@@ -1,15 +1,17 @@
 """Celery tasks for pipeline processing."""
+
+from typing import Any, Dict
+
 from config.celery_app import celery_app
 from config.database import SessionLocal
-from pipeline.processor import EventProcessor
-from pipeline.correlator import EventCorrelator
-from detection.splunk_detector import SplunkDetector
+from config.settings import settings
 from detection.elastic_detector import ElasticDetector
 from detection.endpoint_detector import EndpointDetector
 from detection.network_detector import NetworkDetector
+from detection.splunk_detector import SplunkDetector
 from models.integration import Integration, IntegrationType
-from config.settings import settings
-from typing import Dict, Any
+from pipeline.correlator import EventCorrelator
+from pipeline.processor import EventProcessor
 
 
 @celery_app.task
@@ -17,12 +19,12 @@ def collect_events_from_sources():
     """Collect events from all configured sources."""
     db = SessionLocal()
     processor = EventProcessor()
-    
+
     try:
         # Get enabled integrations
         integrations = db.query(Integration).filter(Integration.enabled == True).all()
         all_events = []
-        
+
         for integration in integrations:
             try:
                 detector = _get_detector(integration)
@@ -32,12 +34,12 @@ def collect_events_from_sources():
             except Exception as e:
                 print(f"Error collecting events from {integration.name}: {e}")
                 continue
-        
+
         # Process all collected events
         if all_events:
             result = processor.process_events(all_events)
             return result
-        
+
         return {"status": "success", "events_collected": 0}
     except Exception as e:
         return {"error": str(e), "status": "failed"}
@@ -50,21 +52,23 @@ def correlate_events():
     """Correlate events and create incidents if needed."""
     db = SessionLocal()
     correlator = EventCorrelator()
-    
+
     try:
         correlations = correlator.correlate_events(time_window_minutes=60)
-        
+
         incident_ids = []
         for correlation in correlations:
             if correlation.get("severity") in ["high", "critical"]:
-                incident_id = correlator.create_incident_from_correlation(correlation, db)
+                incident_id = correlator.create_incident_from_correlation(
+                    correlation, db
+                )
                 incident_ids.append(incident_id)
-        
+
         return {
             "status": "success",
             "correlations_found": len(correlations),
             "incidents_created": len(incident_ids),
-            "incident_ids": incident_ids
+            "incident_ids": incident_ids,
         }
     except Exception as e:
         return {"error": str(e), "status": "failed"}
@@ -75,16 +79,16 @@ def correlate_events():
 def _get_detector(integration: Integration):
     """Get detector instance from integration model."""
     config = integration.config
-    
+
     type_mapping = {
         IntegrationType.SIEM_SPLUNK: SplunkDetector,
         IntegrationType.SIEM_ELASTIC: ElasticDetector,
     }
-    
+
     detector_class = type_mapping.get(integration.integration_type)
     if not detector_class:
         return None
-    
+
     # Map integration config to detector config
     if integration.integration_type == IntegrationType.SIEM_SPLUNK:
         detector_config = {
@@ -108,6 +112,5 @@ def _get_detector(integration: Integration):
         }
     else:
         return None
-    
-    return detector_class(detector_config)
 
+    return detector_class(detector_config)

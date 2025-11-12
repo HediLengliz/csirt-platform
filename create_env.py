@@ -1,4 +1,5 @@
 """Create .env file with generated secret keys."""
+
 import secrets
 
 # Generate secret keys
@@ -64,7 +65,7 @@ ML_RETRAIN_INTERVAL_HOURS=24
 """
 
 # Write .env file
-with open('.env', 'w') as f:
+with open(".env", "w") as f:
     f.write(env_content)
 
 print("SUCCESS: .env file created with generated secret keys!")
@@ -76,4 +77,3 @@ print("2. Choose your setup method:")
 print("   - Docker Compose: docker-compose up -d")
 print("   - Local: Follow START_HERE.md")
 print("3. Access API at: http://localhost:8000/docs")
-

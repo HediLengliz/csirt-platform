@@ -1,7 +1,8 @@
 """Database models."""
-from models.incident import Incident, IncidentStatus, IncidentSeverity
-from models.alert import Alert, AlertStatus, AlertPriority
+
+from models.alert import Alert, AlertPriority, AlertStatus
 from models.event import Event, EventSource, EventType
+from models.incident import Incident, IncidentSeverity, IncidentStatus
 from models.integration import Integration, IntegrationType
 
 __all__ = [
@@ -17,4 +18,3 @@ __all__ = [
     "Integration",
     "IntegrationType",
 ]
-

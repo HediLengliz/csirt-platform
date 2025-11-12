@@ -1,5 +1,7 @@
 """Celery configuration for async task processing."""
+
 from celery import Celery
+
 from config.settings import settings
 
 celery_app = Celery(
@@ -10,7 +12,7 @@ celery_app = Celery(
         "pipeline.tasks",
         "alerts.tasks",
         "integrations.tasks",
-    ]
+    ],
 )
 
 celery_app.conf.update(
@@ -33,4 +35,3 @@ celery_app.conf.update(
         },
     },
 )
-

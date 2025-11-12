@@ -1,45 +1,51 @@
 """Base detector class."""
+
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from models.event import Event, EventSource, EventType
 
 
 class BaseDetector(ABC):
     """Base class for all detectors."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         """Initialize detector with configuration."""
         self.config = config
         self.source = self.get_source()
-    
+
     @abstractmethod
     def get_source(self) -> EventSource:
         """Return the event source type."""
         pass
-    
+
     @abstractmethod
     def connect(self) -> bool:
         """Establish connection to data source."""
         pass
-    
+
     @abstractmethod
-    def fetch_events(self, start_time: str = None, end_time: str = None) -> List[Dict[str, Any]]:
+    def fetch_events(
+        self, start_time: str = None, end_time: str = None
+    ) -> List[Dict[str, Any]]:
         """Fetch events from the source."""
         pass
-    
+
     @abstractmethod
     def normalize_event(self, raw_event: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize event data to common format."""
         pass
-    
-    def detect_events(self, start_time: str = None, end_time: str = None) -> List[Event]:
+
+    def detect_events(
+        self, start_time: str = None, end_time: str = None
+    ) -> List[Event]:
         """Detect and normalize events."""
         if not self.connect():
             raise ConnectionError(f"Failed to connect to {self.source.value}")
-        
+
         raw_events = self.fetch_events(start_time, end_time)
         normalized_events = []
-        
+
         for raw_event in raw_events:
             try:
                 normalized = self.normalize_event(raw_event)
@@ -61,13 +67,13 @@ class BaseDetector(ABC):
                 # Log error but continue processing
                 print(f"Error normalizing event: {e}")
                 continue
-        
+
         return normalized_events
-    
+
     def _classify_event_type(self, normalized_data: Dict[str, Any]) -> EventType:
         """Classify event type based on normalized data."""
         event_type_str = normalized_data.get("event_type", "").lower()
-        
+
         type_mapping = {
             "login_failure": EventType.LOGIN_FAILURE,
             "login_success": EventType.LOGIN_SUCCESS,
@@ -79,10 +85,9 @@ class BaseDetector(ABC):
             "ddos": EventType.DDoS,
             "phishing": EventType.PHISHING,
         }
-        
+
         for key, event_type in type_mapping.items():
             if key in event_type_str:
                 return event_type
-        
-        return EventType.OTHER
 
+        return EventType.OTHER
