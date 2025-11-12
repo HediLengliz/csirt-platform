@@ -184,10 +184,12 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Python Security Check
+      - name: Set up Python for Security Check
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Python Security Check
         run: |
           pip install safety
           safety check --json || true
