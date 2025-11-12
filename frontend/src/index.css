@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0f172a;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+@layer components {
+  .card {
+    @apply bg-slate-800 rounded-lg shadow-lg p-6 border border-slate-700;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+  
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-600 hover:bg-slate-700 text-white;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+  
+  .badge {
+    @apply px-2 py-1 text-xs font-semibold rounded-full;
+  }
+  
+  .badge-critical {
+    @apply bg-red-900 text-red-200;
+  }
+  
+  .badge-high {
+    @apply bg-orange-900 text-orange-200;
+  }
+  
+  .badge-medium {
+    @apply bg-yellow-900 text-yellow-200;
+  }
+  
+  .badge-low {
+    @apply bg-blue-900 text-blue-200;
+  }
+  
+  .badge-info {
+    @apply bg-gray-700 text-gray-200;
+  }
+}
+
