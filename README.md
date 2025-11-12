@@ -7,6 +7,9 @@
 ![React](https://img.shields.io/badge/React-18-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104-teal)
 ![ML](https://img.shields.io/badge/ML-Scikit--learn-orange)
+![CI](https://github.com/HediLengliz/csirt-platform/workflows/CI%20Pipeline/badge.svg)
+![Docker](https://github.com/HediLengliz/csirt-platform/workflows/Docker%20Build%20and%20Publish/badge.svg)
+![Lint](https://github.com/HediLengliz/csirt-platform/workflows/Lint%20and%20Format%20Check/badge.svg)
 
 **Enterprise-grade Security Incident Response Platform with Real-time ML/AI Detection**
 
