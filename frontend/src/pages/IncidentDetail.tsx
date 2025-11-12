@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { incidentsApi } from '../lib/api'
-import { useToastContext } from '../contexts/ToastContext'
+import { useToastContext } from '../hooks/useToastContext'
 import QuickActions from '../components/QuickActions'
 import { ArrowLeft, Edit, Save, Tag, Shield, FileDown } from 'lucide-react'
 import { format } from 'date-fns'

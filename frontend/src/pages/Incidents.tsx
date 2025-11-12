@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { Search, Download, Plus } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import Pagination from '../components/Pagination'
-import { useToastContext } from '../contexts/ToastContext'
+import { useToastContext } from '../hooks/useToastContext'
 
 export default function Incidents() {
   const [filters, setFilters] = useState({

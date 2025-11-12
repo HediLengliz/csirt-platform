@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { incidentsApi, alertsApi } from '../lib/api'
-import { useToastContext } from '../contexts/ToastContext'
+import { useToastContext } from '../hooks/useToastContext'
 import { Save, X, Plus, Trash2 } from 'lucide-react'
 
 export default function CreateIncident() {
@@ -33,13 +33,19 @@ export default function CreateIncident() {
 
   // Pre-fill form if alert exists
   useEffect(() => {
-    if (alert && !formData.title) {
-      setFormData({
-        ...formData,
-        title: `Incident: ${alert.title}`,
-        description: alert.description || '',
-        severity: alert.priority === 'critical' ? 'critical' : alert.priority === 'high' ? 'high' : 'medium',
-        alert_id: alert.id,
+    if (alert) {
+      setFormData((prev) => {
+        // Only update if title is empty to avoid overwriting user input
+        if (!prev.title) {
+          return {
+            ...prev,
+            title: `Incident: ${alert.title}`,
+            description: alert.description || '',
+            severity: alert.priority === 'critical' ? 'critical' : alert.priority === 'high' ? 'high' : 'medium',
+            alert_id: alert.id,
+          }
+        }
+        return prev
       })
     }
   }, [alert])

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { alertsApi, mlApi } from '../lib/api'
-import { useToastContext } from '../contexts/ToastContext'
+import { useToastContext } from '../hooks/useToastContext'
 import QuickActions from '../components/QuickActions'
 import MLInsights from '../components/MLInsights'
 import { ArrowLeft, Link as LinkIcon, Brain, RefreshCw } from 'lucide-react'

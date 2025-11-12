@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { eventsApi, Event } from '../lib/api'
+import { eventsApi } from '../lib/api'
 import { Activity, Search, Download, Plus } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { Link } from 'react-router-dom'
 import Pagination from '../components/Pagination'
-import { useToastContext } from '../contexts/ToastContext'
+import { useToastContext } from '../hooks/useToastContext'
 
 export default function Events() {
   const [filters, setFilters] = useState({

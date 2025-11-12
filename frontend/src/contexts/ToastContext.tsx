@@ -1,8 +1,8 @@
-import { createContext, useContext, ReactNode } from 'react'
-import { useToast, Toast } from '../hooks/useToast'
-import { ToastContainer } from '../components/Toast'
+import { createContext, ReactNode } from 'react'
+import { useToast } from '../hooks/useToast'
+import { ToastContainer, type Toast } from '../components/Toast'
 
-interface ToastContextType {
+export interface ToastContextType {
   success: (message: string, duration?: number) => string
   error: (message: string, duration?: number) => string
   info: (message: string, duration?: number) => string
@@ -10,7 +10,7 @@ interface ToastContextType {
   toasts: Toast[]
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+export const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const toast = useToast()
@@ -21,13 +21,5 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
     </ToastContext.Provider>
   )
-}
-
-export function useToastContext() {
-  const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToastContext must be used within ToastProvider')
-  }
-  return context
 }
 
