@@ -158,8 +158,8 @@ jobs:
 
       - name: Test Docker Compose
         run: |
-          docker-compose config
-          docker-compose build
+          docker compose config
+          docker compose build
 
   security-scan:
     name: Security Scan
