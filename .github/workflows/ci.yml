@@ -81,11 +81,12 @@ jobs:
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
-        if: always()
+        if: always() && hashFiles('coverage.xml') != ''
         with:
           file: ./coverage.xml
           flags: backend
           name: backend-coverage
+          fail_ci_if_error: false
 
   frontend-tests:
     name: Frontend Tests
@@ -179,7 +180,7 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
-        if: always()
+        if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -187,7 +188,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
+        run: |
           pip install safety
           safety check --json || true
 
@@ -211,5 +212,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        if: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
 
