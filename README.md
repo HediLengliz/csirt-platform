@@ -1288,11 +1288,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-## 👥 Authors
 
-- **Security Engineering Team** - Initial work
-
----
 
 ## 🆘 Support
 
@@ -1315,7 +1311,7 @@ For questions, issues, or feature requests:
 
 <div align="center">
 
-**Built with ❤️ for Security Teams**
+**Built with ❤️**
 
 [⬆ Back to Top](#csirt-platform---security-incident-response-team)
 
