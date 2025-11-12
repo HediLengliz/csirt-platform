@@ -24,7 +24,7 @@ splunk-sdk==1.7.2
 elasticsearch==8.11.0
 
 # SOAR Integrations
-requests==2.31.0
+requests==2.32.5
 aiohttp==3.9.1
 
 # Security
