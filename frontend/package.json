@@ -14,7 +14,7 @@
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.3",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
